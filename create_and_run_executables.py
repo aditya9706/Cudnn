@@ -20,6 +20,7 @@ for obj in list_obj :
 # Reading config file     
 ap = argparse.ArgumentParser()
 ap.add_argument("-c", "--configfile", required=True, help="config file name")
+args = vars(ap.parse_args())
 cfg_path = args['configfile']
 config = open(cfg_path, "r")
 
