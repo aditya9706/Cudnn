@@ -1,6 +1,6 @@
 import glob
 import os 
-import args
+import argparse
 
 # creating object files 
 list_cpp = glob.glob("*.cpp")
@@ -17,9 +17,12 @@ for obj in list_obj :
   file_name = obj.split(".")[0]
   os.system("/usr/local/cuda/bin/nvcc -ccbin g++ -m64 -gencode arch=compute_70,code=sm_70 -o Executables/{executable} {object}.o -I/usr/local/cuda/include -I/usr/local/cuda/targets/ppc64le-linux/include-L/usr/local/cuda/lib64 -L/usr/local/cuda/targets/ppc64le-linux/lib -lcublas -lcudnn -lstdc++ -lm".format(executable = file_name, object = obj))
 
-# Reading config file      
-config = open(args["-testfile"], "r")
-           
+# Reading config file     
+ap = argparse.ArgumentParser()
+ap.add_argument("-c", "--configfile", required=True, help="config file name")
+cfg_path = args['configfile']
+config = open(cfg_path, "r")
+
 # Running executables            
 for cmd in config:
   print(cmd)         
