@@ -26,6 +26,7 @@ config = open(cfg_path, "r")
 
 # Running executables            
 for cmd in config:
-  print(cmd)         
+  print(cmd)  
+  os.system("cd Executables")
   os.system(cmd)          
   
