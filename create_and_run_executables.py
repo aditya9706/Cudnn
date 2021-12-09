@@ -28,5 +28,5 @@ config = open(cfg_path, "r")
 for cmd in config:
   print(cmd)  
   os.system("cd Executables")
-  os.system("./" + cmd)          
+  os.system("./Executables" + cmd)          
   
