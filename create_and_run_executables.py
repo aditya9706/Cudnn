@@ -1,5 +1,6 @@
 import glob
 import os 
+import args
 
 # creating object files 
 list_cpp = glob.glob("*.cpp")
