@@ -2,18 +2,21 @@
 #include <string>
 #include <cuda_runtime.h>
 #include <cudnn.h>
+#include <time.h>
 
 /**
- * Minimal example to apply sigmoid activation on a tensor 
+ * Minimal example to apply activation on a tensor 
  * using cuDNN.
  **/
 int main(int argc, char** argv)
 {    
-    //CAI_AG - Reading values for input parameters using command line arguments 
-    for (int i = 0;i <= 5; i++)
-        std::cout << argv[i] << std::endl;
     int n, c, h, w;
     std::string a;
+    
+    // CAI_AG - Reading values for input parameters using command line arguments 
+    for (int i = 0;i <= 5; i++)
+        std::cout << argv[i] << std::endl;
+
     for (int i = 1; i <= 5; i++) {
         int len = sizeof(argv[i]);
         if (argv[i][1] == 'n')
@@ -28,7 +31,7 @@ int main(int argc, char** argv)
           a = argv[i] + 2; 
    }
 
-    //CAI_AG - Generating random input_data 
+    // CAI_AG - Generating random input_data 
     int size = n*c*h*w;
     int input_data[size];
     for (int i = 0; i < size; i++)
@@ -37,6 +40,7 @@ int main(int argc, char** argv)
     int numGPUs;
     cudaGetDeviceCount(&numGPUs);
     std::cout << "Found " << numGPUs << " GPUs." << std::endl;
+    
     cudaSetDevice(0); // use GPU0
     int device; 
     struct cudaDeviceProp devProp;
@@ -70,10 +74,10 @@ int main(int argc, char** argv)
     // create activation function descriptor
     float alpha[c] = {1};
     float beta[c] = {0.0};
-    cudnnActivationDescriptor_t sigmoid_activation;
+    cudnnActivationDescriptor_t activation;
     cudnnActivationMode_t mode;
  
-    //CAI_AG: Initializing activation mode 
+    // CAI_AG: Initializing activation mode 
     if (a == "tanh")
       mode = CUDNN_ACTIVATION_TANH;
     else if (a == "sigmoid")
@@ -82,12 +86,16 @@ int main(int argc, char** argv)
       mode = CUDNN_ACTIVATION_RELU;
  
     cudnnNanPropagation_t prop = CUDNN_NOT_PROPAGATE_NAN;
-    cudnnCreateActivationDescriptor(&sigmoid_activation);
-    cudnnSetActivationDescriptor(sigmoid_activation, mode, prop, 0.0f);
+    cudnnCreateActivationDescriptor(&activation);
+    cudnnSetActivationDescriptor(activation, mode, prop, 0.0f);
 
+    clock_t start, stop;
+    start=clock();
+    
+    // Calling CuDNN Activation Forward API
     cudnnActivationForward(
         handle_,
-        sigmoid_activation,
+        activation,
         alpha,
         x_desc,
         x,
@@ -95,13 +103,20 @@ int main(int argc, char** argv)
         y_desc,
         y 
     );
-
-    cudnnDestroy(handle_);
-    std::cout << std::endl << "Destroyed cuDNN handle." << std::endl;
+    
+    stop=clock();
+	double flopsCoef = 2.0;
+	for(int i=0;i<5;i++)
+	std::cout <<"Input n*c*h*w........"<<x_size*(i+1)<< "...................latancy is "<< ((double)(stop-start))/CLOCKS_PER_SEC<< "...................Throughput "<<(i+1)* (1e-9*flopsCoef*x_size)/(stop-start)<<"\n";
+    
     std::cout << "New array: ";
     for(int i=0;i<size;i++) std::cout << y[i] << " ";
     std::cout << std::endl;
+    
     cudaFree(x);
     cudaFree(y);
+    cudnnDestroy(handle_);
+    std::cout << std::endl << "Destroyed cuDNN handle." << std::endl;
+    
     return 0;
 }
