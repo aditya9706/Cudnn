@@ -100,8 +100,8 @@ int main(int argc, char** argv)
         x_desc,
         x,
         beta,
-        y_desc,
-        x 
+        x_desc,
+        x
     );
     
     stop=clock();
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
 	std::cout <<"Input n*c*h*w........"<<size*(i+1)<< "...................latancy is "<< ((double)(stop-start))/CLOCKS_PER_SEC<< "...................Throughput "<<(i+1)* (1e-9*flopsCoef*size)/(stop-start)<<"\n";
     
     std::cout << "New array: ";
-    for(int i=0;i<size;i++) std::cout << y[i] << " ";
+    for(int i=0;i<size;i++) std::cout << x[i] << " ";
     std::cout << std::endl;
     
     cudaFree(x);
