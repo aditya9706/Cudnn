@@ -104,14 +104,12 @@ int main(int argc, char** argv)
     
     for (int i = 0; i < size; i++)
     {
-      std::cout << i << std::endl;
       x[i] = float(i);
-     std::cout << i << std::endl;
     }
-    std::cout << "CAI" << std::endl;
     std::cout << "Original array: " << std::endl; 
     for(int i=0;i<size;i++) 
         std::cout << x[i] << " ";
+    std::cout << std::endl;
 
     // create activation function descriptor
     float alpha[c] = {1};
