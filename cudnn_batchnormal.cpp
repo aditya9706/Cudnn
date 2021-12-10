@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     // initializing data    
     for (int i = 0; i < size; i++)
     {
-      x[i] = float(i);
+      x[i] = input_data[i];
     }
     std::cout << "Original array: " << std::endl; 
     for(int i=0;i<size;i++) 
