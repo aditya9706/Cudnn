@@ -1,4 +1,4 @@
-cudnnTest_activation -n2 -c2 -h2 -w1 -arelu
-cudnnTest_activation -n2 -c2 -h2 -w1 -atanh
-cudnnTest_activation -n2 -c2 -h2 -w1 -asigmoid
-cudnnTest_batchnormal -n2 -c3 -h8 -w8 -arelu(default)
+cudnn_activation_test -n2 -c2 -h2 -w1 -arelu
+cudnn_activation_test -n2 -c2 -h2 -w1 -atanh
+cudnn_activation_test -n2 -c2 -h2 -w1 -asigmoid
+cudnn_batchnormal_test -n2 -c3 -h8 -w8 -arelu       // -a gets its default value.
