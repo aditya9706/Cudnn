@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     int size = n*c*h*w;
     int input_data[size];
     for (int i = 0; i < size; i++)
-      input_data[i] = rand() % 10;
+      input_data[i] = rand() % 256;
  
     int numGPUs;
     cudaGetDeviceCount(&numGPUs);
@@ -51,15 +51,18 @@ int main(int argc, char** argv)
     // create the tensor descriptor
     cudnnDataType_t dtype = CUDNN_DATA_FLOAT;
     cudnnTensorFormat_t format = CUDNN_TENSOR_NCHW;
-    // int n = 1, c = 1, h = 1, w = 10;
-    // int NUM_ELEMENTS = n*c*h*w;
+
     cudnnTensorDescriptor_t x_desc;
     cudnnCreateTensorDescriptor(&x_desc);
     cudnnSetTensor4dDescriptor(x_desc, format, dtype, n, c, h, w);
- 
+    cudnnTensorDescriptor_t y_desc;
+    cudnnCreateTensorDescriptor(&y_desc);
+    cudnnSetTensor4dDescriptor(y_desc, format, dtype, n, c, h, w);
+    
     // create the tensor
-    float *x;
+    float *x, *y;
     cudaMallocManaged(&x, size * sizeof(float));
+    cudaMallocManaged(&y, size * sizeof(float));
     for(int i=0;i<size;i++) x[i] = input_data[i] * 1.00f;
     std::cout << "Original array: "; 
     for(int i=0;i<size;i++) std::cout << x[i] << " ";
@@ -89,15 +92,16 @@ int main(int argc, char** argv)
         x_desc,
         x,
         beta,
-        x_desc,
-        x 
+        y_desc,
+        y 
     );
 
     cudnnDestroy(handle_);
     std::cout << std::endl << "Destroyed cuDNN handle." << std::endl;
     std::cout << "New array: ";
-    for(int i=0;i<size;i++) std::cout << x[i] << " ";
+    for(int i=0;i<size;i++) std::cout << y[i] << " ";
     std::cout << std::endl;
     cudaFree(x);
+    cudaFree(y);
     return 0;
 }
