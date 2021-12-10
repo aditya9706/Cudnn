@@ -101,7 +101,7 @@ int main(int argc, char** argv)
         x,
         beta,
         y_desc,
-        y 
+        x 
     );
     
     stop=clock();
