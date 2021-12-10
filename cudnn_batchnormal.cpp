@@ -3,11 +3,8 @@
 #include <cuda_runtime.h>
 #include <cudnn.h>
 
-/**
- * Minimal example to apply sigmoid activation on a tensor 
- * using cuDNN.
- **/
-/*#define checkCUDNN(cudnnStatus_t status)                             \
+/*
+#define checkCUDNN(cudnnStatus_t status)                             \
 {                                                          \
   if (status != CUDNN_STATUS_SUCCESS) {                    \
     std::cerr << "Error on line " << __LINE__ << ": "      \
@@ -23,7 +20,8 @@
               << cudaGetErrorString(status) << std::endl;  \
     std::exit(EXIT_FAILURE);                               \
   }                                                        \
-}*/
+}
+*/
 
 void print_array(float *array, int size, const char *name) {
   std::cout << name;
@@ -59,11 +57,12 @@ int main(int argc, char** argv)
     int size = n*c*h*w;
     int input_data[size];
     for (int i = 0; i < size; i++)
-      input_data[i] = rand() % 10;
+      input_data[i] = rand() % 255;
  
     int numGPUs;
     cudaGetDeviceCount(&numGPUs);
     std::cout << "Found " << numGPUs << " GPUs." << std::endl;
+  
     cudaSetDevice(0); // use GPU0
     int device; 
     struct cudaDeviceProp devProp;
@@ -75,7 +74,7 @@ int main(int argc, char** argv)
     cudnnCreate(&handle_);
     std::cout << "Created cuDNN handle" << std::endl;
 
-    //CAI_AG - batch normal
+    // CAI_AG - setting parameters for batchnormal API
     auto mode = CUDNN_BATCHNORM_SPATIAL_PERSISTENT;
     const cudnnBatchNormOps_t bn_ops = CUDNN_BATCHNORM_OPS_BN;
     float one = 1.0;
