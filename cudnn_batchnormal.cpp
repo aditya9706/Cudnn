@@ -1,27 +1,34 @@
+/**
+ * Copyright 2020-2021 Enflame. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @file    cudnn_batchnormal_test.cpp
+ * @brief   cudnn batch normalization API testing
+ *
+ * @author  ashish(CAI)
+ * @date    2021-12-10
+ * @version V1.0
+ * @par     Copyright (c)
+ *          Enflame Tech Company.
+ * @par     History:
+ */
+
 #include <iostream>
 #include <string>
 #include <cuda_runtime.h>
 #include <cudnn.h>
-
-/*
-#define checkCUDNN(cudnnStatus_t status)                             \
-{                                                          \
-  if (status != CUDNN_STATUS_SUCCESS) {                    \
-    std::cerr << "Error on line " << __LINE__ << ": "      \
-              << cudnnGetErrorString(status) << std::endl; \
-    std::exit(EXIT_FAILURE);                               \
-  }                                                        \
-}
-
-#define checkCUDA(cudaError_t status)                              \
-{                                                          \
-  if (status != cudaSuccess) {                             \
-    std::cerr << "Error on line " << __LINE__ << ": "      \
-              << cudaGetErrorString(status) << std::endl;  \
-    std::exit(EXIT_FAILURE);                               \
-  }                                                        \
-}
-*/
+#include <time.h>
 
 void print_array(float *array, int size, const char *name) {
   std::cout << name;
@@ -33,7 +40,7 @@ void print_array(float *array, int size, const char *name) {
 
 int main(int argc, char** argv)
 {    
-    //CAI_AG - Reading values for input parameters using command line arguments 
+    // CAI_AG - Reading values for input parameters using command line arguments 
     for (int i = 0;i < 5; i++)
         std::cout << argv[i] << std::endl;
     
@@ -53,7 +60,7 @@ int main(int argc, char** argv)
  
    }
 
-    //CAI_AG - Generating random input_data 
+    // CAI_AG - Generating random input_data 
     int size = n*c*h*w;
     int input_data[size];
     for (int i = 0; i < size; i++)
@@ -88,10 +95,13 @@ int main(int argc, char** argv)
     cudnnDataType_t dtype = CUDNN_DATA_FLOAT;
     cudnnTensorFormat_t format = CUDNN_TENSOR_NCHW;
     std::cout << "Creating descripter" << std::endl;
+  
     cudnnTensorDescriptor_t x_desc;
     cudnnCreateTensorDescriptor(&x_desc);
     cudnnSetTensor4dDescriptor(x_desc, format, dtype, n, c, h, w);
- 
+    cudnnTensorDescriptor_t y_desc;
+    cudnnCreateTensorDescriptor(&y_desc);
+    cudnnSetTensor4dDescriptor(y_desc, format, dtype, n, c, h, w);
 
     float *x, *y, *dy, *dx;
     cudaMallocManaged(&x, size_bytes);
@@ -100,8 +110,7 @@ int main(int argc, char** argv)
     cudaMallocManaged(&dx, size_bytes);
 
     // initializing data    
-    for (int i = 0; i < size; i++)
-    {
+    for (int i = 0; i < size; i++) {
       x[i] = input_data[i];
     }
     std::cout << "Original array: " << std::endl; 
@@ -136,12 +145,11 @@ int main(int argc, char** argv)
     cudaMallocManaged(&saved_inv_var, mean_size_bytes);
 
     // initialize scale, offset, running_mean, running_var
-    for (int i = 0; i < mean_size; i++)
-    {
-    scale[i] = 1.0;
-    offset[i] = 1.0;
-    running_mean[i] = 1.0;
-    running_var[i] = 1.0;
+    for (int i = 0; i < mean_size; i++) {
+      scale[i] = 1.0;
+      offset[i] = 1.0;
+      running_mean[i] = 1.0;
+      running_var[i] = 1.0;
     }
 
     cudnnActivationDescriptor_t activation_desc;
@@ -153,18 +161,19 @@ int main(int argc, char** argv)
     size_t workspace_size_bytes = 0;
     cudnnGetBatchNormalizationForwardTrainingExWorkspaceSize(
     /*handle=*/handle_, /*mode=*/mode, /*bnOps=*/bn_ops,
-    /*xDesc=*/x_desc, /*zDesc=*/NULL, /*yDesc=*/x_desc,
+    /*xDesc=*/x_desc, /*zDesc=*/NULL, /*yDesc=*/y_desc,
     /*bnScaleBiasMeanVarDesc=*/mean_descriptor,
     /*activationDesc=*/activation_desc,
     /*sizeInBytes=*/&workspace_size_bytes);
  
     void *workspace = nullptr;
     if (workspace_size_bytes > 0) {
-    cudaMalloc(&workspace, workspace_size_bytes);
+      cudaMalloc(&workspace, workspace_size_bytes);
     }
 
-    // double start, stop;
-    // start=second();
+    clock_t start, stop;
+    start=clock();
+  
     size_t reserve_space_size_bytes = 0;
     cudnnGetBatchNormalizationTrainingExReserveSpaceSize(
     /*handle=*/handle_, /*mode=*/mode, /*bnOps=*/bn_ops,
@@ -180,7 +189,7 @@ int main(int argc, char** argv)
     /**beta=*/&zero,
     /*xDesc=*/x_desc,
     /**x=*/x,
-    /*yDesc=*/x_desc,
+    /*yDesc=*/y_desc,
     /**y=*/y,
     /*bnScaleBiasMeanVarDesc=*/mean_descriptor,
     /*bnScaleData=*/scale,
@@ -192,7 +201,11 @@ int main(int argc, char** argv)
     /*resultSaveMean=*/saved_mean,
     /*resultSaveInvVariance=*/saved_inv_var);
     
-
+    stop=clock();
+	  double flopsCoef = 2.0;
+	  for(int i=0;i<5;i++)
+	  std::cout <<"Input n*c*h*w........"<<x_size*(i+1)<< "...................latancy is "<< ((double)(stop-start))/CLOCKS_PER_SEC<< "...................Throughput "<<(i+1)* (1e-9*flopsCoef*x_size)/(stop-start)<<"\n";
+    
     cudaDeviceSynchronize();
 
     print_array(y, size, "output: ");
