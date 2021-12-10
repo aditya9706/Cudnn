@@ -99,9 +99,8 @@ int main(int argc, char** argv)
     cudaMallocManaged(&y, size_bytes);
     cudaMallocManaged(&dy, size_bytes);
     cudaMallocManaged(&dx, size_bytes);
-    std::cout << "adding values to x" << std::endl;
-    // initializing data
-    
+
+    // initializing data    
     for (int i = 0; i < size; i++)
     {
       x[i] = float(i);
