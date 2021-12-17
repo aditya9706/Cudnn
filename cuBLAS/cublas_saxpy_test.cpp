@@ -30,7 +30,8 @@ char* substr(char* arr, int begin, int len)
 
 int main (int argc, char **argv) {
   // reading cmd line arguments
-  int lenA, lenB, scalar_const;
+  int lenA, lenB;
+  float scalar_const;
   for (int i = 0;i < argc; i++) {
     std::cout << argv[i] << std::endl;
   }
@@ -41,7 +42,7 @@ int main (int argc, char **argv) {
     else if (!strcmp(substr(argv[i], 1, 4), "lenB"))
       lenB = atoi(argv[i] + 5);
     else if (!strcmp(substr(argv[i], 1, 9), "const_val"))
-      scalar_const = atoi(argv[i] + 10);
+      scalar_const = atof(argv[i] + 10);
   }
   
   // length of vectorA and vectorB should be same
