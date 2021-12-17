@@ -1,12 +1,45 @@
+/**
+ * Copyright 2021-2022 Enflame. All Rights Reserved.
+ *
+ * @file    cublas_saxpy_test.cpp
+ * @brief   Benchmarking Tests for cublas Saxpy API
+ *
+ * @author  ashish(CAI)
+ * @date    2021-12-17
+ * @version V1.0
+ * @par     Copyright (c)
+ *          Enflame Tech Company.
+ * @par     History:
+ */
+
+
 # include <iostream>
 # include <stdlib.h>
 # include <cuda_runtime.h>
 # include "cublas_v2.h"
+# include <string.h>
 
 int main (int argc, char **argv) {
   // reading cmd line arguments
-  int n = atoi(argv[1]);
-
+  int lenA, lenB, scalar_const;
+  for (int i = 0;i < argc; i++) {
+    std::cout << argv[i] << std::endl;
+  }
+  for (int i = 1; i < 4; i++) {
+    int len = sizeof(argv[i]);
+    if (!strcmp(substr(argv[i], 1, 4), "lenA"))
+      lenA = atoi(argv[i] + 5);
+    else if (!strcmp(substr(argv[i], 1, 4), "lenB"))
+      lenB = atoi(argv[i] + 5);
+    else if (!strcmp(substr(argv[i], 1, 9), "const_val"))
+      scalar_const = atoi(argv[i] + 10);
+  }
+  
+  // length of vectorA and vectorB should be same
+  if(lenA != lenB) {
+      return EXIT_FAILURE;
+  }
+  
   // creating cublas handle
   cudaError_t cudaStat ;
   cublasStatus_t stat ;
@@ -14,69 +47,66 @@ int main (int argc, char **argv) {
   stat = cublasCreate(& handle);
 
   // allocating memory for vectors on host
-  float * x;
-  float * y;
-  x = (float *) malloc(n * sizeof (*x));
-  y = (float *) malloc(n * sizeof (*y));
+  float *vectorA;
+  float *vectorB;
+  vectorA = (float *) malloc(lenA * sizeof (*vectorA));
+  vectorB = (float *) malloc(lenB * sizeof (*vectorB));
 
   // setting up values in vectors
-  for (int j = 0; j < n; j++) {
-    x[j] = (float)j;
+  for (int j = 0; j < lenA; j++) {
+    vectorA[j] = (float)j;
   }
-  for (int j = 0; j < n; j++) {
-    y[j] = (float)j;
+  for (int j = 0; j < lenB; j++) {
+    vectorB[j] = (float)j;
   }
 
   printf ("Original vector x:\n");
-  for (int j = 0; j < n; j++) {
-    printf ("%2.0f, ", x[j]);
+  for (int j = 0; j < lenA; j++) {
+    printf("%2.0f, ", vectorA[j]);
   }
   printf ("\n");
-  for (int j = 0; j < n; j++) {
-    printf ("%2.0f, ", y[j]);
+  for (int j = 0; j < lenB; j++) {
+    printf ("%2.0f, ", vectorB[j]);
   }
   printf ("\n");
 
   // using cudamalloc for allocating memory on device
-  float * d_x;
-  float * d_y;
-  cudaStat = cudaMalloc(( void **)& d_x, n* sizeof (*x));
-  cudaStat = cudaMalloc(( void **)& d_y, n* sizeof (*y));
+  float * vectorAA;
+  float * vectorBB;
+  cudaStat = cudaMalloc(( void **)& vectorAA, lenA * sizeof (*vectorA));
+  cudaStat = cudaMalloc(( void **)& vectorBB, lenB * sizeof (*vectorB));
 
   // setting values of matrices on device
-  stat = cublasSetVector(n, sizeof (*x), x, 1, d_x, 1);
-  stat = cublasSetVector(n, sizeof (*y), y, 1, d_y, 1);
-
-  // scalar quantity to be multiplied with x
-  float al = 2.0;
+  stat = cublasSetVector(lenA, sizeof (*vectorA), vectorA, 1, vectorAA, 1);
+  stat = cublasSetVector(lenB, sizeof (*vectorB), vectorB, 1, vectorBB, 1);
 
   // performing saxpy operation
-  stat = cublasSaxpy(handle, n, &al, d_x, 1, d_y, 1);
+  stat = cublasSaxpy(handle, lenA, &scalar_const, vectorAA, 1, vectorBB, 1);
 
   // getting the final output
-  stat = cublasGetVector(n, sizeof ( float ), d_y, 1, y, 1);
+  stat = cublasGetVector(lenB, sizeof(float), vectorBB, 1, vectorB, 1);
 
   // final output
   printf ("Final output y after Saxpy operation:\n");
-  for (int j = 0; j < n; j++) {
-    printf ("%2.0f, ", y[j]);
+  for (int j = 0; j < lenB; j++) {
+    printf ("%2.0f, ", vectorB[j]);
   }
   printf ("\n");
 
   // free device memory
-  cudaFree(d_x);
-  cudaFree(d_y);
+  cudaFree(vectorAA);
+  cudaFree(vectorBB);
 
   // destroying cublas handle
   cublasDestroy(handle);
 
   // freeing host memory
-  free(x);
-  free(y);
+  free(vectorA);
+  free(vectorB);
 
   return EXIT_SUCCESS ;
 }
 // x,y:
 // 0 , 1 , 2 , 3 , 4 , 5 ,
 // y after Saxpy :
-// 0 , 3 , 6 , 9 ,12 ,15 ,// 2*x+y = 2*{0 ,1 ,2 ,3 ,4 ,5} + {0 ,1 ,2 ,3 ,4 ,5}
+// 0 , 3 , 6 , 9 ,12 ,15 ,// a*x+y = 2*{0 ,1 ,2 ,3 ,4 ,5} + {0 ,1 ,2 ,3 ,4 ,5}
