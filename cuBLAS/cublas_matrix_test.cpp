@@ -67,7 +67,8 @@ int  main(int argc, char** argv) {
   }
   rowC = rowA;
   colC = colB;
-
+  std::cout << rowA << " " << colA << " " << rowB << " " << colB << " " << rowC << " " << colC << " " << std::endl;
+  
   // allocating memory for matrices on host
   float *matrixA = (float*) malloc(rowA * colA * sizeof(float));
   float *matrixB = (float*) malloc(rowB * colB * sizeof(float));
