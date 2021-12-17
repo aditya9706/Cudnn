@@ -54,10 +54,10 @@ int main (int argc, char **argv) {
 
   // setting up values in vectors
   for (int j = 0; j < lenA; j++) {
-    vectorA[j] = (float)j;
+    vectorA[j] = (float) (rand() % 10000) / 100;
   }
   for (int j = 0; j < lenB; j++) {
-    vectorB[j] = (float)j;
+    vectorB[j] = (float) (rand() % 10000) / 100;
   }
 
   printf ("Original vector x:\n");
