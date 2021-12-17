@@ -56,13 +56,13 @@ int  main(int argc, char** argv) {
   }
   for (int i = 1; i < 5; i++) {
         int len = sizeof(argv[i]);
-        if (!strcmp(substr(argv[i], 0, 5), "rowA"))
+        if (!strcmp(substr(argv[i], 1, 5), "rowA"))
           rowA = atoi(argv[i] + 5);
-        else if (!strcmp(substr(argv[i], 0, 5), "colA"))
+        else if (!strcmp(substr(argv[i], 1, 5), "colA"))
           colA = atoi(argv[i] + 5);
-        else if (!strcmp(substr(argv[i], 0, 5), "rowB"))
+        else if (!strcmp(substr(argv[i], 1, 5), "rowB"))
           rowB = atoi(argv[i] + 5);
-        else if (!strcmp(substr(argv[i], 0, 5), "colB"))
+        else if (!strcmp(substr(argv[i], 1, 5), "colB"))
           colB = atoi(argv[i] + 5);
   }
   rowC = rowA;
