@@ -29,6 +29,7 @@ void printMat(float*P, int uWP, int uHP) {
       printf("%f ", P[index(i, j, uHP)]);
     }
   }
+  printf("\n\n");
 }
 
 char* substr(char* arr, int begin, int len)
@@ -162,7 +163,7 @@ int  main(int argc, char** argv) {
 
   // printing latency and throughput of the function
   std::cout << "\nLatency: " <<  ((double)(end-start)) / double(CLOCKS_PER_SEC) <<
-        "\nThroughput: " << (1e-9 * 2) / (end - start) << "\n";
+        "\nThroughput: " << (1e-9 * 2) / (end - start) << "\n\n";
 
   // freeing host memory
   free(matrixA);
