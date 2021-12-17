@@ -70,15 +70,16 @@ int main (int argc, char **argv) {
     vectorB[j] = (float) (rand() % 10000) / 100;
   }
 
-  printf ("Original vector x:\n");
+  printf ("\nOriginal vector x:\n");
   for (int j = 0; j < lenA; j++) {
     printf("%2.0f, ", vectorA[j]);
   }
   printf ("\n");
+  printf ("Original vector y:\n");
   for (int j = 0; j < lenB; j++) {
     printf ("%2.0f, ", vectorB[j]);
   }
-  printf ("\n");
+  printf ("\n\n");
 
   // using cudamalloc for allocating memory on device
   float * vectorAA;
@@ -101,7 +102,7 @@ int main (int argc, char **argv) {
   for (int j = 0; j < lenB; j++) {
     printf ("%2.0f, ", vectorB[j]);
   }
-  printf ("\n");
+  printf ("\n\n");
 
   // free device memory
   cudaFree(vectorAA);
