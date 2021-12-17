@@ -1,0 +1,6 @@
+cublas_saxpy_test -lenA10 -lenB10 -const_val10
+cublas_saxpy_test -lenA10 -lenB20 -const_val10
+cublas_saxpy_test -lenA10 -lenB10 -const_val50
+cublas_matrix_test -rowA3 -colA3 -rowB3 -colB5
+cublas_matrix_test -rowA5 -colA5 -rowB5 -colB4
+cublas_matrix_test -rowA3 -colA3 -rowB4 -colB5
