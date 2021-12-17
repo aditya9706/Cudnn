@@ -5,7 +5,7 @@
  * @brief   To run benchmarking test for cudnn API
  *
  * @author  ashish(CAI)
- * @date    2021-12-13
+ * @date    2021-12-17
  * @version V1.0
  * @par     Copyright (c)
  *          Enflame Tech Company.
