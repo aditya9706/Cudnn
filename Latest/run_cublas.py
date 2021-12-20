@@ -52,13 +52,15 @@ for cmd in config:
   else :
     status = "FAILED"
 
-  summary = {"API": "", "Latency": "", "Throughput": "", "Status": status}
+  summary = {"API": "", "Latency": "", "Throughput": "", "Test Level": "", "Status": status}
 
   arguments = cmd.split(" ")
   for line in arguments :
     if ("./" in line) :
       executable = line.split("/")[2]
       summary["API"] = executable.split("_")[1]
+    elif ("-L" in line) :
+      summary["Test Level"] = line.split("-")[1]
 
   for line in output :
     if ("Latency" in line) :
