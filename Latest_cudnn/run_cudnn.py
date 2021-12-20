@@ -53,7 +53,7 @@ for cmd in config:
   else :
     status = "FAILED"
 
-  summary = {"API": "", "Batch": "", "Channel": "", "Height": "", "Width": "", "Latency": "", "Throughput": "", "Status": status}
+  summary = {"API": "", "Batch": "", "Channel": "", "Height": "", "Width": "", "Latency": "", "Throughput": "", "Test Level": "", "Status": status}
 
   arguments = cmd.split(" ")
   activation_type = ""
@@ -76,6 +76,8 @@ for cmd in config:
       summary["Height"] = line.split("-h")[1]
     elif ("-w" in line) :
       summary["Width"] = line.split("-w")[1]
+    elif ("-L" in line) :
+      summary["Test Level"] = line.split("-")[1]
 
   for line in output :
     if ("Latency" in line) :
