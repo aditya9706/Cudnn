@@ -1,0 +1,4 @@
+cudnn_activation_test -n2 -c2 -h2 -w2 -arelu -L0
+cudnn_activation_test -n2 -c2 -h8 -w8 -atanh -L0
+cudnn_activation_test -n2 -c3 -h6 -w6 -asigmoid -L1
+cudnn_batchnormalForwardTraining_test -n2 -c3 -h8 -w8 -arelu -L1
