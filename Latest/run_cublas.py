@@ -31,8 +31,6 @@ Table = []
 total_cases = 0
 passed_cases = 0
 
-print("\nExecuting cuBLAS Test Cases")
-print("===========================\n\n")
 # Running executables            
 for cmd in config:
   print(cmd)  
