@@ -76,12 +76,12 @@ print("Executed on: ", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
 header = Table[0].keys()
 rows =  [x.values() for x in Table]
-print("\n\n\n")
+print("\n")
 print(tabulate.tabulate(rows, header))
 
 failed_cases = total_cases - passed_cases
 passed_percentage = (passed_cases * 100) / total_cases
 
-print("[{passed_cases}/{total_cases} PASSED]")
+print("\n\n[{passed}/{total} PASSED]".format(passed = passed_cases, total = total_cases))
 print("{percent}% tests passed, {failed} tests failed out of {total}".format(percent = passed_percentage, failed = failed_cases, total = total_cases))
 
