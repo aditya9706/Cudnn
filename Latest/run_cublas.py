@@ -38,12 +38,14 @@ for cmd in config:
   print(cmd)  
   cmd = "./Executables/" + cmd
   os.system("cd Executables")
-
+  total_cases += 1
+  
   output = []
   status = ""
   lines = []
   if (os.system(cmd + " >> output.txt") == 0):
     status = "PASSED"
+    passed_cases += 1
     proc = subprocess.Popen([cmd], stdout = subprocess.PIPE, shell = True)
     (out, err) = proc.communicate()
     output = str(out).split("\\n")
