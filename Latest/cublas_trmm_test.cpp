@@ -153,7 +153,7 @@ int main (int argc, char **argv) {
   clk_end = clock();
 
   // getting the final output
-  status = cublasGetMatrix(z_row, C_col, sizeof(float), DeviceMatC, C_row, HostMatC, C_row);
+  status = cublasGetMatrix(C_row, C_col, sizeof(float), DeviceMatC, C_row, HostMatC, C_row);
   if (status != CUBLAS_STATUS_SUCCESS) {
     fprintf (stderr, "!!!! Failed to to Get values in Host vector C\n");
     return EXIT_FAILURE;
