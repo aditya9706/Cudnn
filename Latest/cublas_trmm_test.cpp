@@ -3,13 +3,6 @@
 #include "cublas.h"
 #include "cublas_v2.h"
 
-#define FIRST_ARG "x_row"    // name for first command line argument
-#define SECOND_ARG "y_col"   // name for second command line argument
-#define THIRD_ARG "alpha"    // name for third command line argument
-#define FIRST_ARG_LEN 5      // length of first command line argument
-#define SECOND_ARG_LEN 5     // length of second command line argument
-#define THIRD_ARG_LEN 5      // length of third command line argument
-#define BEGIN 1
 #define INDEX(row, col, row_count) (((col) * (row_count)) + (row))     // for getting index values matrices
 #define RANDOM (rand() % 10000 * 1.00) / 100    // to generate random values 
 
@@ -31,28 +24,33 @@ void PrintMatrix(float* Matrix, int matrix_row, int matrix_col) {
 int main (int argc, char **argv) {
 
   clock_t clk_start, clk_end;
-  int x_row, x_col, y_row, y_col, z_row, z_col;
+  int A_row, A_col, B_row, B_col, C_row, C_col;
   float alpha;
 
-  std::cout << "\n" << std::endl;
-  for (int loop_count = 0; loop_count < argc; loop_count++) {
-    std::cout << argv[loop_count] << std::endl;
+  std::cout << argv[0] << std::endl;
+  for (int loop_count = 1; loop_count < argc; loop_count += 2) {
+    std::cout << argv[loop_count] << " ";
+    if(loop_count + 1 < argc)
+      std::cout << argv[loop_count + 1] << std::endl;
   }
+  std::cout << std::endl;
+
   // reading command line arguments
-  for (int loop_count = 1; loop_count < argc; loop_count++) {
-    std::string str(argv[loop_count]);
-    if (!((str.substr(BEGIN, FIRST_ARG_LEN)).compare(FIRST_ARG))) {
-      x_row = atoi(argv[loop_count] + FIRST_ARG_LEN + 1); 
-      y_row = x_row;
-      z_row = x_row;
-      x_col = x_row;
+  for (int loop_count = 1; loop_count < argc; loop_count += 2) {
+    std::string cmd_argument(argv[loop_count]);
+
+    if (!(cmd_argument.compare("-A_row"))) {
+      A_row = atoi(argv[loop_count + 1]); 
+      B_row = A_row;
+      C_row = A_row;
+      A_col = A_row;
     }
-    else if (!((str.substr(BEGIN, SECOND_ARG_LEN)).compare(SECOND_ARG))) {
-      y_col = atoi(argv[loop_count] + SECOND_ARG_LEN + 1);
-      z_col = y_col;
+    else if (!(cmd_argument.compare("-B_column"))) {
+      B_col = atoi(argv[loop_count + 1]);
+      C_col = B_col;
     }
-    else if (!((str.substr(BEGIN, THIRD_ARG_LEN)).compare(THIRD_ARG))) {
-      alpha = atoi(argv[loop_count] + THIRD_ARG_LEN + 1);
+    else if (!(cmd_argument.compare("-alpha"))) {
+      alpha = atoi(argv[loop_count + 1]);
     }
   }
   
@@ -68,71 +66,71 @@ int main (int argc, char **argv) {
   }
 
   // allocating memory for matrices on host
-  float *HostMatX = new float[x_row * x_col];
-  float *HostMatY = new float[y_row * y_col];
-  float *HostMatZ = new float[z_row * z_col];
+  float *HostMatA = new float[A_row * A_col];
+  float *HostMatB = new float[B_row * B_col];
+  float *HostMatC = new float[C_row * C_col];
 
-  if (HostMatX == 0) {
-    fprintf (stderr, "!!!! host memory allocation error (matrixX)\n");
+  if (HostMatA == 0) {
+    fprintf (stderr, "!!!! host memory allocation error (matrixA)\n");
     return EXIT_FAILURE;
   }
-  if (HostMatY == 0) {
-    fprintf (stderr, "!!!! host memory allocation error (matrixY)\n");
+  if (HostMatB == 0) {
+    fprintf (stderr, "!!!! host memory allocation error (matrixB)\n");
     return EXIT_FAILURE;
   }
-  if (HostMatZ == 0) {
-    fprintf (stderr, "!!!! host memory allocation error (matrixZ)\n");
+  if (HostMatC == 0) {
+    fprintf (stderr, "!!!! host memory allocation error (matrixC)\n");
     return EXIT_FAILURE;
   }
 
   // setting up values for matrices
   // using RANDOM macro to generate random numbers between 0 - 100
   int row, col;
-  for (col = 0; col < x_col; col++) {
-    for (row = 0; row < x_row; row++) {
+  for (col = 0; col < A_col; col++) {
+    for (row = 0; row < A_row; row++) {
       if (row >= col) 
-        HostMatX[INDEX(row, col, x_row)] = RANDOM;
+        HostMatA[INDEX(row, col, A_row)] = RANDOM;
       else 
-        HostMatX[INDEX(row, col, x_row)] = 0.0;
+        HostMatA[INDEX(row, col, A_row)] = 0.0;
     }
   }
 
-  for (row = 0; row < y_row; row++) {
-    for (col = 0; col < y_col; col++) {
-        HostMatY[INDEX(row, col, y_row)] = RANDOM;
+  for (row = 0; row < B_row; row++) {
+    for (col = 0; col < B_col; col++) {
+        HostMatB[INDEX(row, col, B_row)] = RANDOM;
     }
   }
 
   // allocating memory for matrices on device using cublasAlloc
-  float* DeviceMatX;
-  float* DeviceMatY;
-  float* DeviceMatZ;
+  float* DeviceMatA;
+  float* DeviceMatB;
+  float* DeviceMatC;
 
-  status = cublasAlloc(x_row * x_col, sizeof(float), (void**) &DeviceMatX);
+  status = cublasAlloc(A_row * A_col, sizeof(float), (void**) &DeviceMatA);
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Device memory allocation error (X)\n");
+    fprintf (stderr, "!!!! Device memory allocation error (A)\n");
     return EXIT_FAILURE;
   }
-  status = cublasAlloc(y_row * y_col, sizeof(float), (void**) &DeviceMatY);
+  status = cublasAlloc(A_row * B_col, sizeof(float), (void**) &DeviceMatB);
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Device memory allocation error (Y)\n");
+    fprintf (stderr, "!!!! Device memory allocation error (B)\n");
     return EXIT_FAILURE;
   }
-  status = cublasAlloc(z_row * z_col, sizeof(float), (void**) &DeviceMatZ);
+  status = cublasAlloc(A_row * C_col, sizeof(float), (void**) &DeviceMatC);
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (Z)\n");
+    fprintf (stderr, "!!!! device memory allocation error (C)\n");
     return EXIT_FAILURE;
   }
 
   // setting the values of matrices on device
-  status = cublasSetMatrix(x_row, x_col, sizeof(float), HostMatX, x_row, DeviceMatX, x_row);
+  status = cublasSetMatrix(A_row, A_col, sizeof(float), HostMatA, A_row, DeviceMatA, A_row);
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Setting up values on device for matrix (X) failed\n");
+    fprintf (stderr, "!!!! Setting up values on device for matrix (A) failed\n");
     return EXIT_FAILURE;
   }
-  status = cublasSetMatrix(y_row, y_col, sizeof(float), HostMatY, y_row, DeviceMatY, y_row);
+  status = cublasSetMatrix(B_row, B_col, sizeof(float), HostMatB, B_row, DeviceMatB, B_row);
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Setting up values on device for matrix (X) failed\n");
+    fprintf (stderr, "!!!! Setting up values on device for matrix (B) failed\n");
     return EXIT_FAILURE;
   }
   
@@ -143,11 +141,11 @@ int main (int argc, char **argv) {
   // d_x - mxm triangular matrix in lower mode ,
   // d_y , d_z - mxn general matrices ; alpha - scalar
   status = cublasStrmm(handle, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_LOWER,
-                       CUBLAS_OP_N, CUBLAS_DIAG_NON_UNIT, y_row, y_col, &alpha, 
-                       DeviceMatX, x_row, DeviceMatY, y_row, DeviceMatZ, z_row);
+                       CUBLAS_OP_N, CUBLAS_DIAG_NON_UNIT, B_row, B_col, &alpha, 
+                       DeviceMatA, A_row, DeviceMatB, B_row, DeviceMatC, C_row);
  
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Setting up values on device for matrix (Y) failed\n");
+    fprintf (stderr, "!!!! API execution failed\n");
     return EXIT_FAILURE;
   }
 
@@ -155,36 +153,36 @@ int main (int argc, char **argv) {
   clk_end = clock();
 
   // getting the final output
-  status = cublasGetMatrix(z_row, z_col, sizeof(float), DeviceMatZ, z_row, HostMatZ, z_row);
+  status = cublasGetMatrix(z_row, C_col, sizeof(float), DeviceMatC, C_row, HostMatC, C_row);
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Failed to to Get values in Host vector Y\n");
+    fprintf (stderr, "!!!! Failed to to Get values in Host vector C\n");
     return EXIT_FAILURE;
   }
 
   // Matrix output
-  std::cout << "\nMatrix X:";
-  PrintMatrix(HostMatX, x_row, x_col);
-  std::cout << "\nMatrix Y:";
-  PrintMatrix(HostMatY, y_row, y_col);
-  std::cout << "\nMatrix Z:";
-  PrintMatrix(HostMatZ, z_row, z_col);
+  std::cout << "\nMatrix A:";
+  PrintMatrix(HostMatA, A_row, A_col);
+  std::cout << "\nMatrix B:";
+  PrintMatrix(HostMatB, B_row, B_col);
+  std::cout << "\nMatrix C:";
+  PrintMatrix(HostMatC, C_row, C_col);
 
   // printing latency and throughput of the function
   std::cout << "\nLatency: " <<  ((double)(clk_end - clk_start)) / double(CLOCKS_PER_SEC) <<
                "\nThroughput: " << THROUGHPUT(clk_start, clk_end) << "\n\n";
 
   // free device memory
-  cudaStatus = cudaFree(DeviceMatX);
+  cudaStatus = cudaFree(DeviceMatA);
   if( cudaStatus != cudaSuccess) {
     printf(" the device memory deallocation failed\n");
     return EXIT_FAILURE;   
   }
-  cudaStatus = cudaFree(DeviceMatY);
+  cudaStatus = cudaFree(DeviceMatB);
   if( cudaStatus != cudaSuccess) {
     printf(" the device  memory deallocation failed\n");
     return EXIT_FAILURE;   
   }
-  cudaStatus = cudaFree(DeviceMatZ);
+  cudaStatus = cudaFree(DeviceMatC);
   if( cudaStatus != cudaSuccess) {
     printf(" the device  memory deallocation failed\n");
     return EXIT_FAILURE;   
@@ -198,9 +196,9 @@ int main (int argc, char **argv) {
   }
 
   // freeing host memory
-  delete[] HostMatX; // free host memory
-  delete[] HostMatY; // free host memory
-  delete[] HostMatZ; // free host memory
+  delete[] HostMatA; // free host memory
+  delete[] HostMatB; // free host memory
+  delete[] HostMatC; // free host memory
   
   return EXIT_SUCCESS ;
 }
