@@ -18,7 +18,7 @@ int main ( int argc, char **argv) {
   clock_t clk_start, clk_end;
   int vector_length;
   
-  std::cout << argv[0] << std::endl;
+  std::cout << "\n\n" << argv[0] << std::endl;
   for (int loop_count = 1; loop_count < argc; loop_count += 2) {
     std::cout << argv[loop_count] << " ";
     if(loop_count + 1 < argc)
@@ -32,62 +32,62 @@ int main ( int argc, char **argv) {
       vector_length = atoi(argv[loop_count + 1]);
   }
   
-  // pointers A and B pointing  to vectors
-  float * HostVecA;             
-  float * HostVecB; 
+  // pointers X and Y pointing  to vectors
+  float * HostVecX;             
+  float * HostVecY; 
   
   // host memory allocation for vectors
-  HostVecA = new float[vector_length]; 
-  HostVecB = new float[vector_length]; 
+  HostVecX = new float[vector_length]; 
+  HostVecY = new float[vector_length]; 
   
-  if (HostVecA == 0) {
-    fprintf (stderr, "!!!! Host memory allocation error (vector A)\n");
+  if (HostVecX == 0) {
+    fprintf (stderr, "!!!! Host memory allocation error (vector X)\n");
     return EXIT_FAILURE;
   }
    
-  if (HostVecB == 0) {
-    fprintf (stderr, "!!!! Host memory allocation error (vector B)\n");
+  if (HostVecY == 0) {
+    fprintf (stderr, "!!!! Host memory allocation error (vector Y)\n");
     return EXIT_FAILURE;
   }
   
   int index; 
 
-  // setting up values in A and B vectors
+  // setting up values in X and Y vectors
   // using RANDOM macro to generate random float numbers between 0 - 100
   for (index = 0; index < vector_length; index++) {
-    HostVecA[index] = RANDOM;                               
+    HostVecX[index] = RANDOM;                               
   }
 
   for (index = 0; index < vector_length; index++) {
-    HostVecB[index] = RANDOM; 
+    HostVecY[index] = RANDOM; 
   }
   
-  // printing the initial values in vector A and vector B
-  std::cout <<"\nX vector initially:\n";
+  // printing the initial values in vector X and vector Y
+  std::cout << "\nX vector initially:\n";
   for (index = 0; index < vector_length; index++) {
-    std::cout << HostVecA[index] << " "; 
+    std::cout << HostVecX[index] << " "; 
   }
-  std::cout <<"\n";
+  std::cout << "\n";
   
   std::cout << "\nY vector initially :\n";
   for (index = 0; index < vector_length; index++) {
-    std::cout << HostVecB[index] << " "; 
+    std::cout << HostVecY[index] << " "; 
   }
-  std::cout <<"\n";
+  std::cout << "\n";
   
   // Pointers for device memory allocation
-  float *DeviceVecA; 
-  float *DeviceVecB; 
+  float *DeviceVecX; 
+  float *DeviceVecY; 
   
-  cudaStatus = cudaMalloc ((void **) &DeviceVecA, vector_length * sizeof (*HostVecA));
+  cudaStatus = cudaMalloc ((void **) &DeviceVecX, vector_length * sizeof (*HostVecX));
   if( cudaStatus != cudaSuccess) {
-    std::cout << " The device memory allocation failed for A\n";
+    std::cout << " The device memory allocation failed for X\n";
     return EXIT_FAILURE;
   }
   
-  cudaStatus = cudaMalloc ((void **) &DeviceVecB, vector_length * sizeof (*HostVecB));
+  cudaStatus = cudaMalloc ((void **) &DeviceVecY, vector_length * sizeof (*HostVecY));
   if( cudaStatus != cudaSuccess) {
-    std::cout <<" The device memory allocation failed for B\n";
+    std::cout << " The device memory allocation failed for Y\n";
     return EXIT_FAILURE;   
   }
  
@@ -98,24 +98,24 @@ int main ( int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  status = cublasSetVector (vector_length, sizeof (*HostVecA) , HostVecA, 1, DeviceVecA, 1); 
+  status = cublasSetVector (vector_length, sizeof (*HostVecX) , HostVecX, 1, DeviceVecX, 1); 
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Failed to set vector values for A on gpu\n");
+    fprintf (stderr, "!!!! Failed to set vector values for X on gpu\n");
     return EXIT_FAILURE;
   }
   
-  status = cublasSetVector (vector_length, sizeof (*HostVecB), HostVecB, 1, DeviceVecB, 1); 
+  status = cublasSetVector (vector_length, sizeof (*HostVecY), HostVecY, 1, DeviceVecY, 1); 
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! Failed to set vector values for B on gpu\n");
+    fprintf (stderr, "!!!! Failed to set vector values for Y on gpu\n");
     return EXIT_FAILURE;
   }
 
-  float dot_product ;
+  float dot_product;
 
   clk_start = clock();
 
-  // performing dot product operation and storing result in result variable
-  status = cublasSdot(handle, vector_length, DeviceVecA, 1, DeviceVecB, 1, &dot_product);
+  // performing dot product operation and storing result in dot_product variable
+  status = cublasSdot(handle, vector_length, DeviceVecX, 1, DeviceVecY, 1, &dot_product);
 
   clk_end = clock();
   
@@ -125,22 +125,22 @@ int main ( int argc, char **argv) {
   }
   
   //printing the final result
-  std::cout << "\nDot product A.B is : " << dot_product << "\n"; 
+  std::cout << "\nDot product X.Y is : " << dot_product << "\n"; 
   
   // printing latency and throughput of the function
   std::cout << "\nLatency: " <<  ((double)(clk_end - clk_start)) / double(CLOCKS_PER_SEC) <<
                "\nThroughput: " << THROUGHPUT(clk_start, clk_end) << "\n\n";
 
   //freeing device memory
-  cudaStatus = cudaFree (DeviceVecA);
+  cudaStatus = cudaFree (DeviceVecX);
   if( cudaStatus != cudaSuccess) {
-    std::cout << " Memory free error on device for vector A\n";
+    std::cout << " Memory free error on device for vector X\n";
     return EXIT_FAILURE;
   }
   
-  cudaStatus = cudaFree (DeviceVecB);
+  cudaStatus = cudaFree (DeviceVecY);
   if( cudaStatus != cudaSuccess) {
-    std::cout << " Memory free error on device for vector B\n";
+    std::cout << " Memory free error on device for vector Y\n";
     return EXIT_FAILURE;
   }
   
@@ -151,12 +151,12 @@ int main ( int argc, char **argv) {
     return EXIT_FAILURE;
   }
   
-  delete[] HostVecA; 
-  delete[] HostVecB; 
+  delete[] HostVecX; 
+  delete[] HostVecY; 
 
   return EXIT_SUCCESS ;
 }
 
-// x,y: 0, 1, 2, 3, 4, 5
+// x, y: 0, 1, 2, 3, 4, 5
 // dot product x.y: = 55 
 // 1*1 + 2*2 + 3*3 + 4*4 + 5*5
