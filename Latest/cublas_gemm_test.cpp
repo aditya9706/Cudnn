@@ -26,7 +26,7 @@ int main (int argc, char **argv) {
   int A_row, A_col, B_row, B_col, C_row, C_col;
   float alpha, beta;
 
-  std::cout << argv[0] << std::endl;
+  std::cout << "\n\n" << argv[0] << std::endl;
   for (int loop_count = 1; loop_count < argc; loop_count += 2) {
     std::cout << argv[loop_count] << " ";
     if(loop_count + 1 < argc)
