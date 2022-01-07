@@ -1,6 +1,9 @@
-cublas_saxpy_test -len_x10 -len_y10 -const_val50 -L0
-cublas_matrixMultiplication_test -row_x3 -col_x3 -row_y3 -col_y5 -L1
-cublas_dot_test -vector_length 10 -L0
-cublas_trmm_test -A_row 3 -B_column 5 -alpha 4 -L1
-cublas_symm_test -A_row 3 -B_column 5 -alpha 2 -beta 3 -L0
+cublas_axpy_test -vector_length 10 -alpha 5 -L0
+cublas_dot_test -vector_length 12 -L0
+cublas_trmm_test -A_row 3 -B_column 5 -alpha 6 -L1
+cublas_symm_test -A_row 3 -B_column 5 -alpha 2 -beta 3 -L1
 cublas_gemm_test -A_row 4 -A_column 3 -B_column 5 -alpha 6 -beta 5 -L1
+cublas_syrk_test -A_row 4 -A_column 3 -alpha 6 -beta 5 -L1
+cublas_hemm_test -A_row 3 -B_column 5 -alpha_real 1 -alpha_imaginary 0 -beta_real 1 -beta_imaginary 0 -L1
+cublas_trsm_test -A_row 3 -B_column 6 -alpha_real 3 -L0
+cublas_herk_test -A_row 5 -A_column 3 -alpha 1 -beta 2 -L1
