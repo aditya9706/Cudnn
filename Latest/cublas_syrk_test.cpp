@@ -1,11 +1,10 @@
-# include <iostream>
-# include <stdio.h>
-# include <stdlib.h>
-# include <cuda_runtime.h>
-# include "cublas_v2.h"
+#include <iostream>
+#include <string.h>
+#include "cublas.h"
+#include "cublas_v2.h"
 
 #define INDEX(row, col, row_count) (((col) * (row_count)) + (row))   // for getting index values matrices
-#define RANDOM (rand() % 1000 * 1.00) / 100    // for getting random values
+#define RANDOM (rand() % 10000 * 1.00) / 100    // for getting random values
 
 /* 1e-9 for converting throughput in GFLOP/sec, multiplying by 2 as each multiply-add operation uses two flops and 
  finally dividing it by latency to get required throughput */
@@ -26,7 +25,7 @@ int main (int argc, char **argv) {
   int A_row, A_col, C_row, C_col;
   float alpha, beta;
   
-  std::cout << argv[0] << std::endl;
+  std::cout << "\n\n" << argv[0] << std::endl;
   for (int loop_count = 1; loop_count < argc; loop_count += 2) {
     std::cout << argv[loop_count] << " ";
     if(loop_count + 1 < argc)
@@ -53,7 +52,7 @@ int main (int argc, char **argv) {
   
   C_row = A_row;
   C_col = A_row;
-  std::cout << A_row << " " << A_col << " " << C_row << " " << C_col << " " << alpha << " " << beta << std::endl;
+
   cudaError_t cudaStatus; 
   cublasStatus_t status; 
   cublasHandle_t handle; 
@@ -143,12 +142,11 @@ int main (int argc, char **argv) {
 
   clk_start = clock();
 
-  // symmetric rank-k update : C = alpha * d_A * d_A^T + beta *d_C ;
+  // symmetric rank-k update : C = alpha * d_A * d_A^T + beta * d_C ;
   // d_C - symmetric n x n matrix, d_A - general n x k matrix ;
   // alpha, beta - scalars  
   status = cublasSsyrk(handle, CUBLAS_FILL_MODE_LOWER, CUBLAS_OP_N,
-                       A_row, A_col, &alpha, DeviceMatA, A_row, 
-                       &beta, DeviceMatC, C_row);
+                       A_row, A_col, &alpha, DeviceMatA, A_row, &beta, DeviceMatC, C_row);
   
   clk_end = clock();
 
@@ -217,10 +215,11 @@ int main (int argc, char **argv) {
 // 15 21 27 33
 // 16 22 28 34
 
-// lower triangle of updated c after Ssyrk : c=al*a*a^T+bet *c
+// lower triangle of updated c after Ssyrk : c = al * a * a^T + bet * c
 // 1791
 // 1872 1961
 // 1953 2046 2138
 // 2034 2131 2227 2322
 // 2115 2216 2316 2415 2513
 // 2196 2301 2405 2508 2610 2711
+
