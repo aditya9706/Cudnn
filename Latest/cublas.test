@@ -9,3 +9,4 @@ cublas_trsm_test -A_row 3 -B_column 6 -alpha_real 3 -L0
 cublas_herk_test -A_row 5 -A_column 3 -alpha 1 -beta 2 -L1
 cublas_her2k_test -A_row 4 -A_column 4 -alpha_real 1 -alpha_imaginary 1 -beta 2 -L1
 cublas_gemmStridedBatched_test -A_row 3 -A_column 4 -B_column 5 -batch_count 3 -alpha 1 -beta 2 -L1
+cublas_syrk_test -A_row 5 -A_column 3 -alpha 1 -beta 2 -L1
