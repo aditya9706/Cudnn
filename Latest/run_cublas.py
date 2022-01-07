@@ -26,7 +26,7 @@ for obj in list_obj :
 
 # Reading config file     
 ap = argparse.ArgumentParser()
-ap.add_argument("-c", "--configfile", required=True, help="config file name")
+ap.add_argument("-c", "--configfile", required = True, help = "config file name")
 args = vars(ap.parse_args())
 cfg_path = args['configfile']
 config = open(cfg_path, "r")
@@ -36,12 +36,12 @@ summary_table = []
 commands = []
 total_cases = 0
 passed_cases = 0
-table_name = "SUMMARY3"
+table_name = "SUMMARY"
 
 # Setting up conection to connect to database
 connection = sqlite3.connect('summary.db')
 if (connection) :
-  print("database connected")
+  print("\nDatabase connected")
 else :
   print("Failed to connect to database")
   
@@ -62,8 +62,11 @@ for cmd in config:
   lines = []
   
   summary = {"Command": "", "Latency": "", "Throughput": "", "Test_Level": "", "Status": ""}
+
   summary["Command"] = cmd.split("\n")[0]
-  summary["Test_Level"] = "L" + summary["Command"].split("-L")[1].split("\n")[0]
+
+  if ("-L" in summary["Command"]) :
+    summary["Test_Level"] = "L" + summary["Command"].split("-L")[1].split("\n")[0]
   
   API = summary["Command"].split("_")[1]
 
@@ -95,18 +98,17 @@ for cmd in config:
 
 # Saving changes in table  
 connection.commit()
-print("\n==================================")
-print("Data Uploaded on SQLite Database")
-print("==================================")
 connection.close()
+
+print("\n==================================")
+print("Data uploaded on SQLite Database shown below in JSON format")
+print("==================================")
+
+formatted_json = json.dumps(json_summary, indent=2)
+print(formatted_json)
 
 with open("Summary.json", 'w') as json_file :
     json.dump(json_summary,json_file)
-print("\n============================")
-print("Printing Data in JSON format")
-print("============================")
-formatted_json = json.dumps(json_summary, indent=2)
-print(formatted_json)
 
 print("\n\n=============================")
 print("Test Result Summary of cuBLAS")
