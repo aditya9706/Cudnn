@@ -27,7 +27,7 @@ int main (int argc, char **argv) {
   int A_row, A_col, B_row, B_col, C_row, C_col;
   float alpha;
 
-  std::cout << argv[0] << std::endl;
+  std::cout << "\n\n" << argv[0] << std::endl;
   for (int loop_count = 1; loop_count < argc; loop_count += 2) {
     std::cout << argv[loop_count] << " ";
     if(loop_count + 1 < argc)
@@ -111,12 +111,12 @@ int main (int argc, char **argv) {
     fprintf (stderr, "!!!! Device memory allocation error (A)\n");
     return EXIT_FAILURE;
   }
-  status = cublasAlloc(A_row * B_col, sizeof(float), (void**) &DeviceMatB);
+  status = cublasAlloc(B_row * B_col, sizeof(float), (void**) &DeviceMatB);
   if (status != CUBLAS_STATUS_SUCCESS) {
     fprintf (stderr, "!!!! Device memory allocation error (B)\n");
     return EXIT_FAILURE;
   }
-  status = cublasAlloc(A_row * C_col, sizeof(float), (void**) &DeviceMatC);
+  status = cublasAlloc(C_row * C_col, sizeof(float), (void**) &DeviceMatC);
   if (status != CUBLAS_STATUS_SUCCESS) {
     fprintf (stderr, "!!!! device memory allocation error (C)\n");
     return EXIT_FAILURE;
@@ -137,9 +137,9 @@ int main (int argc, char **argv) {
   // start variable to store time
   clk_start = clock();
   
-  // triangular matrix - matrix multiplication : d_z = alpha * d_x * d_y ;
-  // d_x - mxm triangular matrix in lower mode ,
-  // d_y , d_z - mxn general matrices ; alpha - scalar
+  // triangular matrix - matrix multiplication : d_C = alpha * d_A * d_B ;
+  // d_A - mxm triangular matrix in lower mode ,
+  // d_B , d_C - mxn general matrices ; alpha - scalar
   status = cublasStrmm(handle, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_LOWER,
                        CUBLAS_OP_N, CUBLAS_DIAG_NON_UNIT, B_row, B_col, &alpha, 
                        DeviceMatA, A_row, DeviceMatB, B_row, DeviceMatC, C_row);
@@ -202,3 +202,30 @@ int main (int argc, char **argv) {
   
   return EXIT_SUCCESS ;
 }
+
+// lower triangle of a:
+// 11
+// 12 17
+// 13 18 22
+// 14 19 23 26
+// 15 20 24 27 29
+// 16 21 25 28 30 31
+
+// b:
+// 11 17 23 29 35
+// 12 18 24 30 36
+// 13 19 25 31 37
+// 14 20 26 32 38
+// 15 21 27 33 39
+// 16 22 28 34 40
+
+// c = alpha * a * b
+
+// c after Strmm :
+// 121 187 253 319 385
+// 336 510 684 858 1032
+// 645 963 1281 1599 1917
+// 1045 1537 2029 2521 3013
+// 1530 2220 2910 3600 4290
+// 2091 2997 3903 4809 5715
+
