@@ -32,7 +32,7 @@ int main (int argc, char **argv) {
   cublasHandle_t handle ;
   clock_t clk_start, clk_end;
 
-  std::cout << argv[0] << std::endl;
+  std::cout << "\n\n" << argv[0] << std::endl;
   for (int loop_count = 1; loop_count < argc; loop_count += 2) {
     std::cout << argv[loop_count] << " ";
     if(loop_count + 1 < argc)
@@ -168,7 +168,7 @@ int main (int argc, char **argv) {
  
   clk_start = clock();
 
-  // symmetric matrix - matrix multiplication : 
+  // symmetric matrix - matrix multiplication 
   status = cublasSsymm(handle, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_LOWER,
                         B_row, B_col, &alpha, DeviceMatA, A_row, DeviceMatB,
                         B_row, &beta, DeviceMatC, C_row);
@@ -223,3 +223,4 @@ int main (int argc, char **argv) {
   
   return EXIT_SUCCESS ;
 }
+
